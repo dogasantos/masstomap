@@ -6,33 +6,34 @@ You need to specify a masscan standard report file and a name for the nmap repor
 
 FILES
 
-This tool will generate 4 files:
-
-massscan.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.
-project-client-a.nmap.grepable - a grepable nmap report
-project-client-a.nmap.text - a standard text nmap report
-project-client-a.nmap.xml - a xml formated nmap report
+This tool will generate 4 files:<br>
+<br>
+massscan.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
+project-client-a.nmap.grepable - a grepable nmap report<br>
+project-client-a.nmap.text - a standard text nmap report<br>
+project-client-a.nmap.xml - a xml formated nmap report<br>
 
 
 Usage:
-
+`
 $ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]
 
 
-Options::
+Options:
 
-  -h, --help                                      show this help message and exit
-  -m MASSCAN, --masscan MASSCAN                   masscan report file
-  -o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT       nmap output file
-  -sl SCRIPT_LIST, --script-list SCRIPT_LIST      Comma separated list of nmap scripts to run
-  -v [VERBOSE], --verbose [VERBOSE]               Enable Verbosity
+  -h, --help                                      show this help message and exit<br>
+  -m MASSCAN, --masscan MASSCAN                   masscan report file<br>
+  -o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT       nmap output file<br>
+  -sl SCRIPT_LIST, --script-list SCRIPT_LIST      Comma separated list of nmap scripts to run<br>
+  -v [VERBOSE], --verbose [VERBOSE]               Enable Verbosity<br>
+`
+Requirements:<br>
 
-Requirements;
+python-nmap<br>
+argparse<br>
 
-python-nmap
-argparse
-
-Resolve requirements by running pip install -p requirements.txt
+Resolve requirements by running 
+`pip install -p requirements.txt`
 
 NOTES:
 

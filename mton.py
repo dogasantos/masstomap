@@ -32,6 +32,7 @@ def parse_args():
     parser.add_argument('-m', '--masscan', help="masscan report file", required=True)
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=True)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
+    parser.add_argument('-sp', '--skip-project', help="Skip project directory creation (dump everything into the current directory)", nargs='?',required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
     return parser.parse_args()
 
@@ -174,7 +175,7 @@ def prepare(user_masscan,user_output,verbose):
     return projectdir_fullpath
 
 
-def mtonStart(user_masscan,user_script_list,user_verbose,user_output):
+def mtonStart(skip_project,user_masscan,user_script_list,user_verbose,user_output):
     if user_verbose:
         print "[*] Preparing environment"
 
@@ -182,7 +183,11 @@ def mtonStart(user_masscan,user_script_list,user_verbose,user_output):
         print "[x] The specified masscan report file does not exist. Please review."
         sys.exit(1)
 
-    projectdir = prepare(user_masscan,user_output,user_verbose)
+    if skip_project == True:
+        projectdir = "."
+    else:
+        projectdir = prepare(user_masscan,user_output,user_verbose)
+
     if user_verbose:
         print "  + Current directory: %s" %str(projectdir)
 
@@ -205,5 +210,7 @@ if __name__ == "__main__":
     user_script_list = args.script_list
     user_verbose = args.verbose
     user_output = args.nmap_output
+    skip_project = args.skip_project
 
-    mtonStart(user_masscan,user_script_list,user_verbose,user_output)
+    mtonStart(skip_project,user_masscan,user_script_list,user_verbose,user_output)
+

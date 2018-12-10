@@ -32,7 +32,6 @@ def parse_args():
     parser.add_argument('-m', '--masscan', help="masscan report file", required=True)
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=True)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
-    parser.add_argument('-sp', '--skip-project', help="Skip project directory creation (dump everything into the current directory)", nargs='?',required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
     return parser.parse_args()
 
@@ -105,16 +104,15 @@ def executeNmap(targets,verbose,script_list,output):
         fx.close()
     return True
 
-def finalize(projectdir,user_output,verbose):
+def finalize(user_output,verbose):
     if verbose:
         print "  + Merging report files"
 
-    os.chdir(projectdir)
     grepable_final_report = open(user_output + ".nmap.grepable", "a")
     text_final_report = open(user_output + ".nmap.txt", "a")
     xml_final_report = open(user_output + ".nmap.xml", "a")
 
-    files = os.listdir(projectdir)  # I'm in the project directory still
+    files = os.listdir(".")
     for fname in sorted(files):
 
         if ".nmap.grepable." in fname:
@@ -154,42 +152,14 @@ def finalize(projectdir,user_output,verbose):
     text_final_report.close()
     return True
 
-def prepare(user_masscan,user_output,verbose):
-    original_dir = os.path.dirname(os.path.abspath(__file__))
 
-    if verbose:
-        print "  + Creating project directory: %s" %str("project."+user_output)
-    projectdir="project."+user_output
-
-    if os.path.isdir(projectdir) == False:
-        os.mkdir(projectdir)
-
-    nreport =projectdir + "/" + user_masscan
-    if verbose:
-        print "  + Moving masscan output to: %s" %str(nreport)
-
-    os.rename(user_masscan,nreport)
-    os.chdir(projectdir)
-
-    projectdir_fullpath=original_dir+"/"+projectdir
-    return projectdir_fullpath
-
-
-def mtonStart(skip_project,user_masscan,user_script_list,user_verbose,user_output):
+def mtonStart(user_masscan,user_script_list,user_verbose,user_output):
     if user_verbose:
         print "[*] Preparing environment"
 
     if os.path.isfile(user_masscan) == False:
         print "[x] The specified masscan report file does not exist. Please review."
         sys.exit(1)
-
-    if skip_project == True:
-        projectdir = "."
-    else:
-        projectdir = prepare(user_masscan,user_output,user_verbose)
-
-    if user_verbose:
-        print "  + Current directory: %s" %str(projectdir)
 
     if user_verbose:
         print "[*] Starting masscan report parsing"
@@ -201,7 +171,7 @@ def mtonStart(skip_project,user_masscan,user_script_list,user_verbose,user_outpu
     if user_verbose:
         print "[*] Finishing process"
 
-    finalize(projectdir,user_output,user_verbose)
+    finalize(user_output,user_verbose)
 
 
 if __name__ == "__main__":
@@ -210,7 +180,6 @@ if __name__ == "__main__":
     user_script_list = args.script_list
     user_verbose = args.verbose
     user_output = args.nmap_output
-    skip_project = args.skip_project
 
-    mtonStart(skip_project,user_masscan,user_script_list,user_verbose,user_output)
+    mtonStart(user_masscan,user_script_list,user_verbose,user_output)
 

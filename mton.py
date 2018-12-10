@@ -8,6 +8,7 @@
 # https://github.com/dogasantos/mton
 #######
 
+import os
 import sys
 import nmap
 import argparse
@@ -35,7 +36,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def parseMasscan(masscanreport):
+def parseMasscan(masscanreport,verbose):
+    if verbose:
+        print "  + Opening masscan report"
     m = open(masscanreport, "r")
     masscan_report_content = m.readlines()
     iplist = list()
@@ -46,6 +49,9 @@ def parseMasscan(masscanreport):
     iplist = list(set(iplist))  # uniq
     ipdict = dict((el, 0) for el in iplist)
 
+    if verbose:
+        print "  + Filtering entries"
+
     for unique_ip in iplist:
         pl = list()
         for item in masscan_report_content:
@@ -55,12 +61,17 @@ def parseMasscan(masscanreport):
                 pl.append(item.split(" ")[2])
         ipdict[unique_ip] = list(pl)
 
+    if verbose:
+        print "  + Creating new report"
+
     f = open(masscanreport + ".new", "w")
     for ip,ports in ipdict.iteritems():
         target_ports = ','.join(ports)
         f.write(ip+":"+target_ports+"\n")
 
     f.close()
+    if verbose:
+        print "  + Report created and list of targets generated"
 
     return ipdict
 
@@ -69,27 +80,105 @@ def parseMasscan(masscanreport):
 
 
 def executeNmap(targets,verbose,script_list,output):
+    if verbose:
+        print "  + Configuring nmap parameterization"
+
     for ip,ports in targets.iteritems():
         target_ports = ','.join(ports)
         if script_list:
             NMAP_SCRIPTS = script_list
         else:
-            NMAP_SCRIPTS = 'http-cors,http-apache-server-status,http-aspnet-debug,http-backup-finder,http-cookie-flags,http-webdav-scan,http-title,http-server-header,http-robots.txt,http-put,http-open-redirect,http-open-proxy,http-method-tamper,http-methods,http-enum,http-errors,http-git,http-headers,http-iis-webdav-vuln,http-internal-ip-disclosure,http-passwd,http-devframework,ssl-enum-ciphers,hostmap-bfk,hostmap-robtex,memcached-info,rtsp-methods,sip-methods,smtp-commands,smtp-open-relay'
+            NMAP_SCRIPTS = 'http-aspnet-debug,http-title,http-server-header,http-open-proxy,http-methods,http-headers,http-internal-ip-disclosure'
 
-        NMAP_ARGUMENTS = "-sV -oG " + output + ".grepable." + ip + " -oN  " + output + ".text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn "
+        NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn "
         if verbose:
-            print "Scanning: %s : %s" %(str(ip),target_ports)
+            print "  + Target:  %s : %s" %(str(ip),target_ports)
         nm = nmap.PortScanner()
         results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
         if verbose:
-            print results
-            print "="*200
+            #print results
+            print "  + Target scanned."
+
         xmlout = nm.get_nmap_last_output()
-        xmlreportfile=output +".xml."+ip
+        if verbose:
+            print "  + Dumping report files (text,xml,grepable)"
+        xmlreportfile=output +".nmap.xml."+ip
         fx = open(xmlreportfile, "w")
         fx.write(xmlout)
         fx.close()
     return True
+
+def finalize(projectdir,user_output,verbose):
+    if verbose:
+        print "  + Merging report files"
+
+    os.chdir(projectdir)
+    grepable_final_report = open(user_output + ".nmap.grepable", "a")
+    text_final_report = open(user_output + ".nmap.txt", "a")
+    xml_final_report = open(user_output + ".nmap.xml", "a")
+
+    files = os.listdir(projectdir)  # I'm in the project directory still
+    for fname in sorted(files):
+
+        if ".nmap.grepable." in fname:
+            gp=open(fname,"r")
+            contents = gp.readlines()
+            for line in contents:
+                print line
+                grepable_final_report.write(str(line))
+            gp.close()
+            if verbose:
+                print "  + Removing: %s" %str(fname)
+            os.unlink(fname)
+
+        if ".nmap.text." in fname:
+            tf=open(fname,"r")
+            contents = tf.readlines()
+            for line in contents:
+                text_final_report.write(line)
+            tf.close()
+            if verbose:
+                print "  + Removing: %s" % str(fname)
+            os.unlink(fname)
+
+        if ".nmap.xml." in fname:
+            xl=open(fname,"r")
+            contents = xl.readlines()
+            for line in contents:
+                xml_final_report.write(line)
+            xl.close()
+            if verbose:
+                print "  + Removing: %s" % str(fname)
+            os.unlink(fname)
+
+
+    grepable_final_report.close()
+    xml_final_report.close()
+    text_final_report.close()
+
+
+
+def prepare(user_masscan,user_output,verbose):
+    original_dir = os.path.dirname(os.path.abspath(__file__))
+
+    if verbose:
+        print "  + Creating project directory: %s" %str("project."+user_output)
+    projectdir="project."+user_output
+
+    if os.path.isdir(projectdir) == False:
+        os.mkdir(projectdir)
+
+    nreport =projectdir + "/" + user_masscan
+    if verbose:
+        print "  + Moving masscan output to: %s" %str(nreport)
+
+    os.rename(user_masscan,nreport)
+    os.chdir(projectdir)
+
+    projectdir_fullpath=original_dir+"/"+projectdir
+    return projectdir_fullpath
+
+
 
 
 if __name__ == "__main__":
@@ -99,6 +188,29 @@ if __name__ == "__main__":
     user_verbose = args.verbose
     user_output = args.nmap_output
 
-    ipdict = parseMasscan(user_masscan)
+    if user_verbose:
+        print "[*] Preparing environment"
+
+    if os.path.isfile(user_masscan) == False:
+        print "[x] The specified masscan report file does not exist. Please review."
+        sys.exit(1)
+
+    projectdir = prepare(user_masscan,user_output,user_verbose)
+    if user_verbose:
+        print "  + Current directory: %s" %str(projectdir)
+
+    if user_verbose:
+        print "[*] Starting masscan report parsing"
+
+    ipdict = parseMasscan(user_masscan,user_verbose)
+    if user_verbose:
+        print "[*] Starting nmap scan phase"
     executeNmap(ipdict,user_verbose,user_script_list,user_output)
+    if user_verbose:
+        print "[*] Finishing process"
+
+    #print projectdir
+    finalize(projectdir,user_output,user_verbose)
+
+
 

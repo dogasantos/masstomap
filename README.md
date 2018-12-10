@@ -8,7 +8,7 @@ FILES
 
 This tool will generate 4 files:
 
-massscan.new - this file has a simple notation: ip:port1,port2,portN to sumarize each target for conveience
+massscan.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.
 project-client-a.nmap.grepable - a grepable nmap report
 project-client-a.nmap.text - a standard text nmap report
 project-client-a.nmap.xml - a xml formated nmap report
@@ -18,22 +18,21 @@ Usage:
 
 $ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]
 
+
 Options::
-  -h, --help            show this help message and exit
-  -m MASSCAN, --masscan MASSCAN
-                        masscan report file
-  -o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT
-                        nmap output file
-  -sl SCRIPT_LIST, --script-list SCRIPT_LIST
-                        Comma separated list of nmap scripts to run
-  -v [VERBOSE], --verbose [VERBOSE]
-                        Enable Verbosity
+
+  -h, --help                                      show this help message and exit
+  -m MASSCAN, --masscan MASSCAN                   masscan report file
+  -o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT       nmap output file
+  -sl SCRIPT_LIST, --script-list SCRIPT_LIST      Comma separated list of nmap scripts to run
+  -v [VERBOSE], --verbose [VERBOSE]               Enable Verbosity
 
 Requirements;
 
 python-nmap
 argparse
 
+Resolve requirements by running pip install -p requirements.txt
 
 NOTES:
 

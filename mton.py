@@ -3,9 +3,9 @@
 # This script parses the masscan standard output (text), creating simple ip:port file report
 # and feed nmap in order to run versioning and scripts
 #
-#
-# author: dogasantos
-# https://github.com/dogasantos/mton
+# version: v0.1
+# Author: dogasantos
+# url: https://github.com/dogasantos/mton
 #######
 
 import os
@@ -16,8 +16,8 @@ import argparse
 
 
 def banner():
-    print "mton v0.1 - masscan-to-nmap"
-    print "---------------------------"
+    print "mton v0.1 - masscan-to-nmap @dogasantos"
+    print "---------------------------------------"
 
 def parser_error(errmsg):
     banner()
@@ -74,10 +74,6 @@ def parseMasscan(masscanreport,verbose):
         print "  + Report created and list of targets generated"
 
     return ipdict
-
-
-
-
 
 def executeNmap(targets,verbose,script_list,output):
     if verbose:
@@ -155,8 +151,7 @@ def finalize(projectdir,user_output,verbose):
     grepable_final_report.close()
     xml_final_report.close()
     text_final_report.close()
-
-
+    return True
 
 def prepare(user_masscan,user_output,verbose):
     original_dir = os.path.dirname(os.path.abspath(__file__))
@@ -179,15 +174,7 @@ def prepare(user_masscan,user_output,verbose):
     return projectdir_fullpath
 
 
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    user_masscan = args.masscan
-    user_script_list = args.script_list
-    user_verbose = args.verbose
-    user_output = args.nmap_output
-
+def mtonStart(user_masscan,user_script_list,user_verbose,user_output):
     if user_verbose:
         print "[*] Preparing environment"
 
@@ -209,7 +196,14 @@ if __name__ == "__main__":
     if user_verbose:
         print "[*] Finishing process"
 
-    #print projectdir
     finalize(projectdir,user_output,user_verbose)
 
 
+if __name__ == "__main__":
+    args = parse_args()
+    user_masscan = args.masscan
+    user_script_list = args.script_list
+    user_verbose = args.verbose
+    user_output = args.nmap_output
+
+    mtonStart(user_masscan,user_script_list,user_verbose,user_output)

@@ -16,7 +16,7 @@ project-client-a.nmap.xml - a xml formated nmap report
 
 Usage:
 
-# python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]
+$ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]
 
 Options::
   -h, --help            show this help message and exit
@@ -35,7 +35,7 @@ python-nmap
 argparse
 
 
-# NOTES:
+NOTES:
 
 This tool needs nmap in the $PATH so it can be executed, and by default, the following nmap scripts should be executed:
 http-title
@@ -48,7 +48,7 @@ http-internal-ip-disclosure
 
 
 
-
+NOTE: Remove --privileged if you don't plan to execute nmap as root.
 
 
 

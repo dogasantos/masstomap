@@ -15,18 +15,36 @@ This tool will generate 4 files:<br>
 
 
 ### Usage:
-[code]
-$ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]
+
+<table style="width:100%">
+  <tr>
+    <th colspan="2">>$ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]</th>
+  </tr>
+  <tr>
+    <td>-h, --help</td>
+    <td> show this help message and exit</td>
+  </tr>
+  <tr>
+    <td>-m MASSCAN, --masscan MASSCAN</td>
+    <td> masscan report file</td> 
+   </tr>
+  <tr>
+    <td>-o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT</td>
+    <td> nmap output file</td> 
+  </tr>
+  <tr>
+    <td>-sl SCRIPT_LIST, --script-list SCRIPT_LIST</td>
+    <td> Comma separated list of nmap scripts to run</td> 
+  </tr>
+  <tr>
+    <td>-v [VERBOSE], --verbose [VERBOSE]</td>
+    <td> Enable Verbosity</td> 
+  </tr>
+  
+</table>
 
 
-Options:
 
-  -h, --help                                      show this help message and exit<br>
-  -m MASSCAN, --masscan MASSCAN                   masscan report file<br>
-  -o NMAP_OUTPUT, --nmap-output NMAP_OUTPUT       nmap output file<br>
-  -sl SCRIPT_LIST, --script-list SCRIPT_LIST      Comma separated list of nmap scripts to run<br>
-  -v [VERBOSE], --verbose [VERBOSE]               Enable Verbosity<br>
-[/code]
 
 
 ### Requirements:

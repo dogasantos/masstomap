@@ -112,7 +112,6 @@ def finalize(user_output,verbose):
     text_final_report = open(user_output + ".nmap.txt", "a")
     xml_final_report = open(user_output + ".nmap.xml", "a")
 
-    files = os.listdir(".")
     for fname in sorted(files):
 
         if ".nmap.grepable." in fname:
@@ -120,7 +119,7 @@ def finalize(user_output,verbose):
             contents = gp.readlines()
             for line in contents:
                 print line
-                grepable_final_report.write(str(line))
+                grepable_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             gp.close()
             if verbose:
                 print "  + Removing: %s" %str(fname)
@@ -130,7 +129,7 @@ def finalize(user_output,verbose):
             tf=open(fname,"r")
             contents = tf.readlines()
             for line in contents:
-                text_final_report.write(line)
+                text_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             tf.close()
             if verbose:
                 print "  + Removing: %s" % str(fname)
@@ -140,7 +139,7 @@ def finalize(user_output,verbose):
             xl=open(fname,"r")
             contents = xl.readlines()
             for line in contents:
-                xml_final_report.write(line)
+                xml_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             xl.close()
             if verbose:
                 print "  + Removing: %s" % str(fname)

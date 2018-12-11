@@ -13,6 +13,7 @@ import os
 import sys
 import nmap
 import argparse
+import xml.dom.minidom
 
 
 def banner():
@@ -109,6 +110,9 @@ def executeNmap(targets, verbose, script_list, output):
 
 
 def finalize(user_output, verbose):
+    regex = r"<runstats>.*?</runstats></nmaprun><\?xml\sversion=\"1.0\"\sencoding=.*?<!DOCTYPE nmaprun><\?xml-stylesheet\shref=.*?\?><!--\sNmap\s.*?--><nmaprun\sscanner=\"nmap\".*?xmloutputversion=\"\d\.\d\d\">"
+
+
     if verbose:
         print "  + Merging report files"
 
@@ -116,14 +120,16 @@ def finalize(user_output, verbose):
     text_final_report = open(user_output + ".nmap.txt", "a")
     xml_final_report = open(user_output + ".nmap.xml", "a")
 
+
+
     files = os.listdir(".")
     for fname in sorted(files):
         if ".nmap.grepable." in fname:
             gp = open(fname, "r")
             contents = gp.readlines()
             for line in contents:
-                line = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n', '',line)
-                grepable_final_report.write(line.encode(encoding='UTF-8', errors='strict'))
+                line_clean = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n', '',line)
+                grepable_final_report.write(line_clean.encode(encoding='UTF-8', errors='strict'))
             gp.close()
             if verbose:
                 print "  + Removing: %s" % str(fname)
@@ -133,9 +139,9 @@ def finalize(user_output, verbose):
             tf = open(fname, "r")
             contents = tf.readlines()
             for line in contents:
-                line = re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$','',
+                line_clean = re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$','',
                               line)
-                text_final_report.write(line.encode(encoding='UTF-8', errors='strict'))
+                text_final_report.write(line_clean.encode(encoding='UTF-8', errors='strict'))
             tf.close()
             if verbose:
                 print "  + Removing: %s" % str(fname)
@@ -145,9 +151,6 @@ def finalize(user_output, verbose):
             xl = open(fname, "r")
             contents = xl.readlines()
             for line in contents:
-                line = re.sub(
-                    '<runstats>.*?\n</runstats>\n</nmaprun>\n<\?xml version="1.0" encoding="UTF-8"\?>\n<!DOCTYPE nmaprun>\n<\?xml-stylesheet href=.*?\?>\n<\!--\sNmap\s.*-->\n<nmaprun scanner="nmap".*>','',
-                    line)
                 xml_final_report.write(line.encode(encoding='UTF-8', errors='strict'))
             xl.close()
             if verbose:
@@ -157,6 +160,21 @@ def finalize(user_output, verbose):
     grepable_final_report.close()
     xml_final_report.close()
     text_final_report.close()
+
+    with open(user_output + ".nmap.xml", 'r') as fd:
+        xmlcontent = fd.read().replace('\n', '')
+
+    #fixing xml report - removing overhead content and make it pareseable
+    new = re.sub(regex, '', xmlcontent)
+    xml_content = xml.dom.minidom.parseString(new)
+    pretty_xml_as_string = xml_content.toprettyxml()
+    x = open(user_output + ".nmap.xml.clean", "a")
+    x.write(pretty_xml_as_string)
+    x.close()
+    os.unlink(user_output + ".nmap.xml")
+    os.rename(user_output + ".nmap.xml.clean",user_output + ".nmap.xml")
+
+
     return True
 
 

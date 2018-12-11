@@ -8,6 +8,7 @@
 # url: https://github.com/dogasantos/mton
 #######
 
+import re
 import os
 import sys
 import nmap
@@ -113,12 +114,11 @@ def finalize(user_output,verbose):
     xml_final_report = open(user_output + ".nmap.xml", "a")
 
     for fname in sorted(files):
-
         if ".nmap.grepable." in fname:
             gp=open(fname,"r")
             contents = gp.readlines()
             for line in contents:
-                print line
+                line = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n' ,line)
                 grepable_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             gp.close()
             if verbose:
@@ -129,6 +129,7 @@ def finalize(user_output,verbose):
             tf=open(fname,"r")
             contents = tf.readlines()
             for line in contents:
+                line=re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$',line)
                 text_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             tf.close()
             if verbose:
@@ -139,6 +140,7 @@ def finalize(user_output,verbose):
             xl=open(fname,"r")
             contents = xl.readlines()
             for line in contents:
+                line = re.sub('<runstats>.*?\n</runstats>\n</nmaprun>\n<\?xml version="1.0" encoding="UTF-8"\?>\n<!DOCTYPE nmaprun>\n<\?xml-stylesheet href=.*?\?>\n<\!--\sNmap\s.*-->\n<nmaprun scanner="nmap".*>',line)
                 xml_final_report.write(line.encode(encoding='UTF-8',errors='strict'))
             xl.close()
             if verbose:

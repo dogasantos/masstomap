@@ -90,7 +90,7 @@ def executeNmap(targets, verbose, script_list, output):
         else:
             NMAP_SCRIPTS = 'http-aspnet-debug,http-title,http-server-header,http-open-proxy,http-methods,http-headers,http-internal-ip-disclosure'
 
-        NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn "
+        NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn --open"
         if verbose:
             print "  + Target:  %s : %s" % (str(ip), target_ports)
         nm = nmap.PortScanner()

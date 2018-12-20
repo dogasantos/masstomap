@@ -1,4 +1,4 @@
-# MTON
+# MASSTOMAP
 
 mton is a simple python script that can be used to read masscan reports and execute nmap powerful service versioning and scripting tasks. 
 

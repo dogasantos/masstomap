@@ -17,8 +17,19 @@ import xml.dom.minidom
 
 
 def banner():
-    print "mton v0.1 - masscan-to-nmap @dogasantos"
-    print "---------------------------------------"
+    print "masstomap v0.1 - masscan-to-nmap @dogasantos"
+    print "--------------------------------------------"
+    print "Parse standard masscan output and feed nmap"
+    print "Example: masscan -p1-65535 --rate 1000 --open -oL masscan.report target"
+    print "         python masstomap.py -m masscan.report -o target.tcp"
+    print ""
+    print "You should end up with the followingn files: "
+    print "masscan.report "
+    print "masscan.report.new "
+    print "output.tcp.nmap.grepable "
+    print "output.tcp.nmap.xml "
+    print "output.tcp.nmap.txt "
+    print " "
 
 
 def parser_error(errmsg):

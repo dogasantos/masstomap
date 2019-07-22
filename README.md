@@ -1,24 +1,26 @@
 # MASSTOMAP
 
-mton is a simple python script that can be used to read masscan reports and execute nmap powerful service versioning and scripting tasks. 
+masstomap is a simple python script that can be used to read masscan reports and execute nmap powerful service versioning and scripting tasks. 
 
-You need to specify a masscan standard report file and a name for the nmap report file this tool should create. A nmap grepable, text and xml report will be created. Yes, all of them so you can feed any tool you may need.
+You need to specify a masscan standard report file (-oL) and a name for the nmap report file this tool should create. 
+A nmap grepable, text and xml report will be created. 
 
 ### FILES
 
 This tool will generate 4 files:<br>
 <br>
-`massscan.new` - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
-`project-client-a.nmap.grepable` - a grepable nmap report<br>
-`project-client-a.nmap.text` - a standard text nmap report<br>
-`project-client-a.nmap.xml` - a xml formated nmap report<br>
+`<given-report-name>.new` - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
+`<given-report-name>.nmap.grepable` - a grepable nmap report<br>
+`<given-report-name>.nmap.text` - a standard text nmap report<br>
+`<given-report-name>.nmap.xml` - a xml formated nmap report<br>
+
 
 
 ### Usage:
 
 <table style="width:100%">
   <tr>
-    <th colspan="2">>$ python mton.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]</th>
+    <th colspan="2">>$ python masstoman.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]</th>
   </tr>
   <tr>
     <td>-h, --help</td>
@@ -44,6 +46,19 @@ This tool will generate 4 files:<br>
 </table>
 
 
+
+###EXAMPLE:
+
+First, masscan:
+
+`$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>`
+
+Then masstomap:
+
+`$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp`
+`$ ls`
+`output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml`
+`$`
 
 
 

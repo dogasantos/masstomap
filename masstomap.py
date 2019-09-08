@@ -46,7 +46,11 @@ def parseMasscan(masscanreport, verbose):
     for item in masscan_report_content:
         if '#' in item:
             continue
-        iplist.append(item.split(" ")[3])
+        if "Discovered open port" in item:
+            iplist.append(item.split()[5])
+            # ['Discovered', 'open', 'port', '45507/tcp', 'on', '192.168.0.1']
+        if "open tcp" in item:
+            iplist.append(item.split()[3])
     iplist = list(set(iplist))  # uniq
     ipdict = dict((el, 0) for el in iplist)
 
@@ -58,8 +62,12 @@ def parseMasscan(masscanreport, verbose):
         for item in masscan_report_content:
             if '#' in item:
                 continue
-            if unique_ip == item.split(" ")[3]:
-                pl.append(item.split(" ")[2])
+            if "open tcp" in item:
+                if unique_ip == item.split()[3]: #ip
+                    pl.append(item.split()[2]) #port
+            if "Discovered open port" in item:
+                if unique_ip == item.split()[5]: #ip
+                    pl.append(item.split()[4].split("/")[0]) #port
         ipdict[unique_ip] = list(pl)
 
     if verbose:

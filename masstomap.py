@@ -67,7 +67,7 @@ def parseMasscan(masscanreport, verbose):
                     pl.append(item.split()[2]) #port
             if "Discovered open port" in item:
                 if unique_ip == item.split()[5]: #ip
-                    pl.append(item.split()[4].split("/")[0]) #port
+                    pl.append(item.split()[3].split("/")[0]) #port
         ipdict[unique_ip] = list(pl)
 
     if verbose:

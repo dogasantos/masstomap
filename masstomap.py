@@ -31,7 +31,7 @@ def parse_args():
     parser.error = parser_error
     parser._optionals.title = "Options:"
     parser.add_argument('-m', '--masscan', help="masscan report file", required=True)
-    parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", nargs='?', required=False)
+    parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", nargs='?', required=False, default=False)
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=False)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
@@ -195,6 +195,7 @@ if __name__ == "__main__":
     ipdict = parseMasscan(user_masscan, user_verbose)
     if noscan:
         sys.exit(0)
+
     executeNmap(ipdict, user_verbose, user_script_list, user_output)
 
     finalize(user_output, user_verbose)

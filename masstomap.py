@@ -19,9 +19,6 @@ def banner():
     print "masstomap v0.2 - masscan-to-nmap @dogasantos"
     print "--------------------------------------------"
 
-
-
-
 def parser_error(errmsg):
     banner()
     print("Usage: python " + sys.argv[0] + " [Options] use -h for help")
@@ -34,8 +31,8 @@ def parse_args():
     parser.error = parser_error
     parser._optionals.title = "Options:"
     parser.add_argument('-m', '--masscan', help="masscan report file", required=True)
-    parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", required=False)
-    parser.add_argument('-o', '--nmap-output', help="nmap output file", required=True)
+    parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", nargs='?', required=False)
+    parser.add_argument('-o', '--nmap-output', help="nmap output file", required=False)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
     return parser.parse_args()
@@ -181,6 +178,10 @@ if __name__ == "__main__":
 
     if os.path.isfile(user_masscan) == False:
         print("[x] The specified masscan file can't be found.")
+        sys.exit(1)
+
+    if user_output and noscan:
+        print("[x] -n and -o can't work together. Choose just one.")
         sys.exit(1)
 
     ipdict = parseMasscan(user_masscan, user_verbose)

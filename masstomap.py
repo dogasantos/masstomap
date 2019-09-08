@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# mton.py - masscan to nmap
+# masstomap.py - masscan to nmap
 # This script parses the masscan standard output (text), creating simple ip:port file report
 # and feed nmap in order to run versioning and scripts
 #
-# version: v0.1
+# version: v0.2
 # Author: dogasantos
-# url: https://github.com/dogasantos/mton
-#######
+# url: https://github.com/dogasantos/masstomap
+###############################################################################################
 
 import re
 import os
@@ -15,21 +15,11 @@ import nmap
 import argparse
 import xml.dom.minidom
 
-
 def banner():
-    print "masstomap v0.1 - masscan-to-nmap @dogasantos"
+    print "masstomap v0.2 - masscan-to-nmap @dogasantos"
     print "--------------------------------------------"
-    print "Parse standard masscan output and feed nmap"
-    print "Example: masscan -p1-65535 --rate 1000 --open -oL masscan.report target"
-    print "         python masstomap.py -m masscan.report -o target.tcp"
-    print ""
-    print "You should end up with the followingn files: "
-    print "masscan.report "
-    print "masscan.report.new "
-    print "output.tcp.nmap.grepable "
-    print "output.tcp.nmap.xml "
-    print "output.tcp.nmap.txt "
-    print " "
+
+
 
 
 def parser_error(errmsg):
@@ -44,6 +34,7 @@ def parse_args():
     parser.error = parser_error
     parser._optionals.title = "Options:"
     parser.add_argument('-m', '--masscan', help="masscan report file", required=True)
+    parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", required=False)
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=True)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
@@ -51,8 +42,7 @@ def parse_args():
 
 
 def parseMasscan(masscanreport, verbose):
-    if verbose:
-        print "  + Opening masscan report"
+    print "[*] Parsing masscan report file"
     m = open(masscanreport, "r")
     masscan_report_content = m.readlines()
     iplist = list()
@@ -85,14 +75,13 @@ def parseMasscan(masscanreport, verbose):
 
     f.close()
     if verbose:
-        print "  + Report created and list of targets generated"
+        print "  + Done"
 
     return ipdict
 
 
 def executeNmap(targets, verbose, script_list, output):
-    if verbose:
-        print "  + Configuring nmap parameterization"
+    print("[*] Executing nmap scan")
 
     for ip, ports in targets.iteritems():
         target_ports = ','.join(ports)
@@ -107,7 +96,6 @@ def executeNmap(targets, verbose, script_list, output):
         nm = nmap.PortScanner()
         results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
         if verbose:
-            # print results
             print "  + Target scanned."
 
         xmlout = nm.get_nmap_last_output()
@@ -121,17 +109,14 @@ def executeNmap(targets, verbose, script_list, output):
 
 
 def finalize(user_output, verbose):
+    print("[*] Wrapping up...")
     regex = r"<runstats>.*?</runstats></nmaprun><\?xml\sversion=\"1.0\"\sencoding=.*?<!DOCTYPE nmaprun><\?xml-stylesheet\shref=.*?\?><!--\sNmap\s.*?--><nmaprun\sscanner=\"nmap\".*?xmloutputversion=\"\d\.\d\d\">"
-
-
     if verbose:
         print "  + Merging report files"
 
     grepable_final_report = open(user_output + ".nmap.grepable", "a")
     text_final_report = open(user_output + ".nmap.txt", "a")
     xml_final_report = open(user_output + ".nmap.xml", "a")
-
-
 
     files = os.listdir(".")
     for fname in sorted(files):
@@ -184,31 +169,7 @@ def finalize(user_output, verbose):
     x.close()
     os.unlink(user_output + ".nmap.xml")
     os.rename(user_output + ".nmap.xml.clean",user_output + ".nmap.xml")
-
-
     return True
-
-
-def mtonStart(user_masscan, user_script_list, user_verbose, user_output):
-    if user_verbose:
-        print "[*] Preparing environment"
-
-    if os.path.isfile(user_masscan) == False:
-        print "[x] The specified masscan report file does not exist. Please review."
-        sys.exit(1)
-
-    if user_verbose:
-        print "[*] Starting masscan report parsing"
-
-    ipdict = parseMasscan(user_masscan, user_verbose)
-    if user_verbose:
-        print "[*] Starting nmap scan phase"
-    executeNmap(ipdict, user_verbose, user_script_list, user_output)
-    if user_verbose:
-        print "[*] Finishing process"
-
-    finalize(user_output, user_verbose)
-
 
 if __name__ == "__main__":
     args = parse_args()
@@ -216,6 +177,15 @@ if __name__ == "__main__":
     user_script_list = args.script_list
     user_verbose = args.verbose
     user_output = args.nmap_output
+    noscan = args.noscan
 
-    mtonStart(user_masscan, user_script_list, user_verbose, user_output)
+    if os.path.isfile(user_masscan) == False:
+        print("[x] The specified masscan file can't be found.")
+        sys.exit(1)
 
+    ipdict = parseMasscan(user_masscan, user_verbose)
+    if noscan:
+        sys.exit(0)
+    executeNmap(ipdict, user_verbose, user_script_list, user_output)
+
+    finalize(user_output, user_verbose)

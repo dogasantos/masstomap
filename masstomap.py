@@ -102,7 +102,7 @@ def executeNmap(targets, verbose, script_list, output):
         results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
         if verbose:
             print "  + Target scanned."
-        if len(results==0) or results is None or results is False:
+        if result == False:
             return False
 
         xmlout = nm.get_nmap_last_output()

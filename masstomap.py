@@ -99,7 +99,10 @@ def executeNmap(targets, verbose, script_list, output):
         if verbose:
             print "  + Target:  %s : %s" % (str(ip), target_ports)
         nm = nmap.PortScanner()
-        results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
+        try:
+            results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
+        except:
+            pass
         if verbose:
             print "  + Target scanned."
         if results == False or results == None:

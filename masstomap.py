@@ -84,7 +84,6 @@ def parseMasscan(masscanreport, verbose):
 
     return ipdict
 
-
 def executeNmap(targets, verbose, script_list, output):
     print("[*] Executing nmap scan")
 
@@ -99,18 +98,12 @@ def executeNmap(targets, verbose, script_list, output):
         if verbose:
             print "  + Target:  %s : %s" % (str(ip), target_ports)
         nm = nmap.PortScanner()
-        try:
-            results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
-        except:
-            pass
+        nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
+
         if verbose:
             print "  + Target scanned."
-        if results == False or results == None:
-            return False
-        try:
-            xmlout = nm.get_nmap_last_output()
-        except:
-            pass
+        xmlout = nm.get_nmap_last_output()
+
         if verbose:
             print "  + Dumping report files (text,xml,grepable)"
         xmlreportfile = output + ".nmap.xml." + ip

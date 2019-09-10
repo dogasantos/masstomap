@@ -102,6 +102,8 @@ def executeNmap(targets, verbose, script_list, output):
         results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
         if verbose:
             print "  + Target scanned."
+        if len(results==0) or results is None or results is False:
+            return False
 
         xmlout = nm.get_nmap_last_output()
         if verbose:
@@ -196,6 +198,8 @@ if __name__ == "__main__":
     if noscan:
         sys.exit(0)
 
-    executeNmap(ipdict, user_verbose, user_script_list, user_output)
-
-    finalize(user_output, user_verbose)
+    ret=executeNmap(ipdict, user_verbose, user_script_list, user_output)
+    if ret == False:
+        print("[x] Nmap can't reach those targets.")
+    else:
+        finalize(user_output, user_verbose)

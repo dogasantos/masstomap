@@ -93,7 +93,7 @@ def executeNmap(targets, verbose, script_list, output):
         if script_list:
             NMAP_SCRIPTS = script_list
         else:
-            NMAP_SCRIPTS = 'http-aspnet-debug,http-title,http-server-header,http-open-proxy,http-methods,http-headers,http-internal-ip-disclosure'
+            NMAP_SCRIPTS = 'http-title,http-server-header,http-open-proxy,http-methods,http-headers'
 
         NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn --open"
         if verbose:
@@ -102,7 +102,7 @@ def executeNmap(targets, verbose, script_list, output):
         results = nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
         if verbose:
             print "  + Target scanned."
-        if result == False:
+        if results == False or results == None:
             return False
 
         xmlout = nm.get_nmap_last_output()

@@ -107,8 +107,11 @@ def executeNmap(targets, verbose, script_list, output):
             print "  + Target scanned."
         if results == False or results == None:
             return False
-
-        xmlout = nm.get_nmap_last_output()
+        xmlout=""
+        try:
+            xmlout = nm.get_nmap_last_output()
+        except:
+            pass
         if verbose:
             print "  + Dumping report files (text,xml,grepable)"
         xmlreportfile = output + ".nmap.xml." + ip

@@ -16,8 +16,8 @@ import argparse
 import xml.dom.minidom
 
 def banner():
-    print "masstomap v0.2 - masscan-to-nmap @dogasantos"
-    print "--------------------------------------------"
+    print("masstomap v0.2 - masscan-to-nmap @dogasantos")
+    print("--------------------------------------------")
 
 def parser_error(errmsg):
     banner()
@@ -39,7 +39,7 @@ def parse_args():
 
 
 def parseMasscan(masscanreport, verbose):
-    print "[*] Parsing masscan report file"
+    print("[*] Parsing masscan report file")
     m = open(masscanreport, "r")
     masscan_report_content = m.readlines()
     iplist = list()
@@ -55,7 +55,7 @@ def parseMasscan(masscanreport, verbose):
     ipdict = dict((el, 0) for el in iplist)
 
     if verbose:
-        print "  + Filtering entries"
+        print("  + Filtering entries")
 
     for unique_ip in iplist:
         pl = list()
@@ -71,7 +71,7 @@ def parseMasscan(masscanreport, verbose):
         ipdict[unique_ip] = list(pl)
 
     if verbose:
-        print "  + Creating new report"
+        print("  + Creating new report")
 
     f = open(masscanreport + ".new", "w")
     for ip, ports in ipdict.iteritems():
@@ -88,6 +88,9 @@ def executeNmap(targets, verbose, script_list, output):
     print("[*] Executing nmap scan")
 
     for ip, ports in targets.iteritems():
+        if os.path.isfile(output + ".nmap.xml." + ip) and os.path.getsize(output + ".nmap.xml." + ip) > 5:
+            print("  + Skipping nmap scan for: "+ ip +" (reason: report file found)")
+            continue
         target_ports = ','.join(ports)
         if script_list:
             NMAP_SCRIPTS = script_list
@@ -96,16 +99,16 @@ def executeNmap(targets, verbose, script_list, output):
 
         NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn --open"
         if verbose:
-            print "  + Target:  %s : %s" % (str(ip), target_ports)
+            print("  + Target:  %s : %s" % (str(ip), target_ports))
         nm = nmap.PortScanner()
         nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
 
         if verbose:
-            print "  + Target scanned."
+            print("  + Target scanned.")
         xmlout = nm.get_nmap_last_output()
 
         if verbose:
-            print "  + Dumping report files (text,xml,grepable)"
+            print("  + Dumping report files (text,xml,grepable)")
         xmlreportfile = output + ".nmap.xml." + ip
         fx = open(xmlreportfile, "w")
         fx.write(xmlout)
@@ -133,7 +136,7 @@ def finalize(user_output, verbose):
                 grepable_final_report.write(line_clean.encode(encoding='UTF-8', errors='strict'))
             gp.close()
             if verbose:
-                print "  + Removing: %s" % str(fname)
+                print("  + Removing: %s" % str(fname))
             os.unlink(fname)
 
         if ".nmap.text." in fname:
@@ -145,7 +148,7 @@ def finalize(user_output, verbose):
                 text_final_report.write(line_clean.encode(encoding='UTF-8', errors='strict'))
             tf.close()
             if verbose:
-                print "  + Removing: %s" % str(fname)
+                print("  + Removing: %s" % str(fname))
             os.unlink(fname)
 
         if ".nmap.xml." in fname:
@@ -155,7 +158,7 @@ def finalize(user_output, verbose):
                 xml_final_report.write(line.encode(encoding='UTF-8', errors='strict'))
             xl.close()
             if verbose:
-                print "  + Removing: %s" % str(fname)
+                print("  + Removing: %s" % str(fname))
             os.unlink(fname)
 
     grepable_final_report.close()

@@ -89,8 +89,12 @@ def executeNmap(targets, verbose, script_list, output):
 
     for ip, ports in targets.iteritems():
         if os.path.isfile(output + ".nmap.xml." + ip) and os.path.getsize(output + ".nmap.xml." + ip) > 5:
-            print("  + Skipping nmap scan for: "+ ip +" (reason: report file found)")
-            continue
+            with open(output + ".nmap.xml." + ip) as r:
+                xmlfile = r.read()
+                if 'finished time' in xmlfile:
+                    print("  + Skipping nmap scan for: "+ ip +" (reason: report file found)")
+                    continue
+
         target_ports = ','.join(ports)
         if script_list:
             NMAP_SCRIPTS = script_list

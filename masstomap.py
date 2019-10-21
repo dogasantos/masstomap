@@ -99,7 +99,7 @@ def executeNmap(targets, verbose, script_list, output):
         if script_list:
             NMAP_SCRIPTS = script_list
         else:
-            NMAP_SCRIPTS = 'http-title,http-server-header,http-open-proxy,http-methods,http-headers'
+            NMAP_SCRIPTS = 'http-title,http-server-header,http-open-proxy,http-methods,http-headers,ssl-cert'
 
         NMAP_ARGUMENTS = "-sV -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn --open"
         if verbose:

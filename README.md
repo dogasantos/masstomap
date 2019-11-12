@@ -48,19 +48,19 @@ This tool will generate 4 files:<br>
 
 
 ###EXAMPLE:
-
-First, masscan:
-
-`$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>`
-
-Then masstomap:
-
-`$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp`
-`$ ls`
-`output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml`
-`$`
-
-
+<br>
+First, masscan:<br>
+<br>
+`$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>`<br>
+<br>
+Then masstomap:<br>
+<br>
+`$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp`<br>
+`$ ls`<br>
+`output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml`<br>
+`$`<br>
+<br>
+<br>
 
 ### Requirements:
 

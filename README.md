@@ -20,7 +20,7 @@ This tool will generate 4 files:<br>
 
 <table style="width:100%">
   <tr>
-    <th colspan="2">>$ python masstoman.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]</th>
+    <th colspan="2">>$ python masstomap.py [-h] -m MASSCAN -o NMAP_OUTPUT [-sl SCRIPT_LIST] [-v [VERBOSE]]</th>
   </tr>
   <tr>
     <td>-h, --help</td>

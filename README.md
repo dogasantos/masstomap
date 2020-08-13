@@ -87,5 +87,8 @@ http-internal-ip-disclosure
 
 Remove --privileged if you don't plan to execute nmap as root.
 
+If you're looking for XLSX (excel) nmap output, check my other script here: https://github.com/dogasantos/nmapxml-to-xlsx
+I have plans to add this feature as optional, in this tool in the future.
+
 twitter: @dogasantos
 

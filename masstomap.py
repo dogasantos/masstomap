@@ -146,8 +146,7 @@ def wrapupxml(user_output, verbose):
             contents = gp.readlines()
             for line in contents:
                 line_clean = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n', '',line)
-                line_clean = line_clean.encode('UTF-8', errors='strict')
-                print(line_clean)
+                line_clean = str(line_clean, 'utf-8' , errors='strict') 
                 grepable_final_report.write(line_clean)
             gp.close()
             if verbose:
@@ -159,7 +158,7 @@ def wrapupxml(user_output, verbose):
             contents = tf.readlines()
             for line in contents:
                 line_clean = re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$','',line)
-                line_clean = line_clean.encode('UTF-8', errors='strict')
+                line_clean = str(line_clean, 'utf-8' , errors='strict') 
                 text_final_report.write(line_clean)
             tf.close()
             if verbose:
@@ -170,7 +169,8 @@ def wrapupxml(user_output, verbose):
             xl = open(fname, "r")
             contents = xl.readlines()
             for line in contents:
-                xml_final_report.write(line.encode('UTF-8', errors='strict'))
+                line = str(line, 'utf-8' , errors='strict') 
+                xml_final_report.write(line)
             xl.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))

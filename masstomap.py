@@ -147,7 +147,7 @@ def wrapupxml(user_output, verbose):
             for line in contents:
                 line_clean = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n', '',line)
                 line_clean = line_clean.encode('UTF-8', errors='strict')
-                grepable_final_report.write(str(line_clean).encode('UTF-8', errors='strict'))
+                grepable_final_report.write(line_clean)
             gp.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))

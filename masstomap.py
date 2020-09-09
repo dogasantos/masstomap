@@ -158,7 +158,7 @@ def wrapupxml(user_output, verbose):
             for line in contents:
                 line_clean = re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$','',
                               line)
-                text_final_report.write(line_clean.encode(encoding='UTF-8', errors='strict'))
+                text_final_report.write(str(line_clean.encode(encoding='UTF-8', errors='strict')))
             tf.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))
@@ -168,7 +168,7 @@ def wrapupxml(user_output, verbose):
             xl = open(fname, "r")
             contents = xl.readlines()
             for line in contents:
-                xml_final_report.write(line.encode(encoding='UTF-8', errors='strict'))
+                xml_final_report.write(str(line.encode(encoding='UTF-8', errors='strict')))
             xl.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))

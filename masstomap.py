@@ -224,6 +224,6 @@ if __name__ == "__main__":
         print("[x] Nmap can't reach those targets.")
     else:
         wrapupxml(user_output, user_verbose)
-        createxlsx(user_output, user_verbose)
+        #createxlsx(user_output, user_verbose) notyet
 
     

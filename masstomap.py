@@ -172,7 +172,6 @@ def wrapupxml(user_output, verbose):
             xl = open(fname, "r")
             contents = xl.readlines()
             for line in contents:
-                line = str(line, 'utf-8' , errors='strict') 
                 xml_final_report.write(line)
             xl.close()
             if verbose:

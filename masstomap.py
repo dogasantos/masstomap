@@ -146,7 +146,7 @@ def wrapupxml(user_output, verbose):
             contents = gp.readlines()
             for line in contents:
                 line_clean = re.sub('\#\sNmap\sdone\sat\s.*\n#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*\n', '',line)
-                grepable_final_report.write(str(line_clean.encode(encoding='UTF-8', errors='strict')))
+                grepable_final_report.write(str(line_clean.encode(encoding='UTF-8', errors='strict').decode('UTF-8')))
             gp.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))
@@ -158,7 +158,7 @@ def wrapupxml(user_output, verbose):
             for line in contents:
                 line_clean = re.sub('Service detection.*?\n\#\sNmap\sDone\sat\s.*?\n\#\sNmap\s\d\.\d\d\sscan\sinitiated\s.*$','',
                               line)
-                text_final_report.write(str(line_clean.encode(encoding='UTF-8', errors='strict')))
+                text_final_report.write(str(line_clean.encode(encoding='UTF-8', errors='strict').decode('UTF-8')))
             tf.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))
@@ -168,7 +168,7 @@ def wrapupxml(user_output, verbose):
             xl = open(fname, "r")
             contents = xl.readlines()
             for line in contents:
-                xml_final_report.write(str(line.encode(encoding='UTF-8', errors='strict')))
+                xml_final_report.write(str(line.encode(encoding='UTF-8', errors='strict').decode('UTF-8')))
             xl.close()
             if verbose:
                 print("  + Removing: %s" % str(fname))

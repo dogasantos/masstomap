@@ -182,7 +182,7 @@ def wrapupxml(user_output, verbose):
         xmlcontent = fd.read().replace('\n', '')
 
     #fixing xml report - removing overhead content and make it pareseable
-    new = re.sub(regex, '', xmlcontent)
+    new = str(re.sub(regex, '', xmlcontent))
     xml_content = xml.dom.minidom.parseString(new)
     pretty_xml_as_string = xml_content.toprettyxml()
     x = open(user_output + ".nmap.xml.clean", "a")

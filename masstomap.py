@@ -83,7 +83,7 @@ def parseMasscan(masscanreport, verbose):
         print("  + Creating new report")
 
     f = open(masscanreport + ".new", "w")
-    for ip, ports in ipdict.iteritems():
+    for ip, ports in ipdict.items():
         target_ports = ','.join(ports)
         f.write(ip + ":" + target_ports + "\n")
 
@@ -96,7 +96,7 @@ def parseMasscan(masscanreport, verbose):
 def executeNmap(targets, verbose, script_list, output):
     print("[*] Executing nmap scan")
 
-    for ip, ports in targets.iteritems():
+    for ip, ports in targets.items():
         if os.path.isfile(output + ".nmap.xml." + ip) and os.path.getsize(output + ".nmap.xml." + ip) > 5:
             with open(output + ".nmap.xml." + ip) as r:
                 xmlfile = r.read()

@@ -3,7 +3,7 @@
 # This script parses the masscan standard output (text), creating simple ip:port file report
 # and feed nmap in order to run versioning and scripts
 #
-# version: v0.2
+# version: v0.3
 # Author: dogasantos
 # url: https://github.com/dogasantos/masstomap
 ###############################################################################################
@@ -18,6 +18,15 @@ import xml.dom.minidom
 def banner():
     print("masstomap v0.2 - masscan-to-nmap @dogasantos")
     print("--------------------------------------------")
+    print("This script will execute a fast masscan task")
+    print("and produce different reports based on provided options:")
+    print(" - masscan default report")
+    print(" - masscan report with different notation ip:port1,port2,portN ")
+    print(" - nmap xml report")
+    print(" - nmap text report")
+    print(" - nmap grepable report")
+    print("\nNOTE: it will produce a xml per target while running, then sumarize into 1 (valid) xml file in the end")
+    
 
 def parser_error(errmsg):
     banner()
@@ -80,7 +89,7 @@ def parseMasscan(masscanreport, verbose):
 
     f.close()
     if verbose:
-        print "  + Done"
+        print("  + Done")
 
     return ipdict
 
@@ -120,11 +129,11 @@ def executeNmap(targets, verbose, script_list, output):
     return True
 
 
-def finalize(user_output, verbose):
+def wrapupxml(user_output, verbose):
     print("[*] Wrapping up...")
     regex = r"<runstats>.*?</runstats></nmaprun><\?xml\sversion=\"1.0\"\sencoding=.*?<!DOCTYPE nmaprun><\?xml-stylesheet\shref=.*?\?><!--\sNmap\s.*?--><nmaprun\sscanner=\"nmap\".*?xmloutputversion=\"\d\.\d\d\">"
     if verbose:
-        print "  + Merging report files"
+        print("  + Merging report files")
 
     grepable_final_report = open(user_output + ".nmap.grepable", "a")
     text_final_report = open(user_output + ".nmap.txt", "a")
@@ -199,6 +208,9 @@ if __name__ == "__main__":
         print("[x] -n and -o can't work together. Choose just one.")
         sys.exit(1)
 
+    if not user_output:
+        user_output="scanreport"
+
     ipdict = parseMasscan(user_masscan, user_verbose)
     if noscan:
         sys.exit(0)
@@ -207,4 +219,7 @@ if __name__ == "__main__":
     if ret == False:
         print("[x] Nmap can't reach those targets.")
     else:
-        finalize(user_output, user_verbose)
+        wrapupxml(user_output, user_verbose)
+        createxlsx(user_output, user_verbose)
+
+    

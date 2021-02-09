@@ -5,6 +5,10 @@ masstomap is a simple python script that can be used to read masscan reports and
 You need to specify a masscan standard report file (-oL) and a name for the nmap report file this tool should create. 
 A nmap grepable, text and xml report will be created. 
 
+### Pause and Resume scan
+
+Masstomap creates a single nmap report per IP/target while it is running against a list of targets. The reason is that you can stop the scan and resume later. Soon as every target is scanned, masstomap will craft a single compliant nmap report using 3 different formats.
+
 ### FILES
 
 This tool will generate 4 files:<br>

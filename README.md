@@ -60,6 +60,7 @@ This tool will generate 4 files:<br>
 <br>
 First, masscan:<br>
 <br>
+
 ```
 $ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>
 ```
@@ -67,11 +68,14 @@ $ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>
 <br>
 Then masstomap:<br>
 <br>
+
 ```
+
 $ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp
 $ ls
 output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml
 $
+
 ```
 
 

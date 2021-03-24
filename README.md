@@ -16,10 +16,12 @@ Again, this tool will create 3 report files per IP/target (text, grepable, xml).
 
 This tool will generate 4 files:<br>
 <br>
-`<given-report-name>.new` - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
-`<given-report-name>.nmap.grepable` - a grepable nmap report<br>
-`<given-report-name>.nmap.text` - a standard text nmap report<br>
-`<given-report-name>.nmap.xml` - a xml formated nmap report<br>
+```
+<given-report-name>.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
+<given-report-name>.nmap.grepable - a grepable nmap report<br>
+<given-report-name>.nmap.text - a standard text nmap report<br>
+<given-report-name>.nmap.xml - a xml formated nmap report<br>
+```
 
 
 
@@ -58,24 +60,29 @@ This tool will generate 4 files:<br>
 <br>
 First, masscan:<br>
 <br>
-`$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>`<br>
+```
+$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>
+```
+
 <br>
 Then masstomap:<br>
 <br>
-`$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp`<br>
-`$ ls`<br>
-`output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml`<br>
-`$`<br>
-<br>
-<br>
+```
+$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp
+$ ls
+output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml
+$
+```
+
 
 ### Requirements:
 
-python-nmap<br>
-argparse<br>
+check requirements.txt file
 
 Resolve requirements by running 
-`pip install -p requirements.txt`
+```
+pip install -p requirements.txt
+```
 
 ### NMAP SCRIPTS:
 
@@ -94,8 +101,24 @@ http-internal-ip-disclosure
 
 Remove --privileged if you don't plan to execute nmap as root.
 
-If you're looking for XLSX (excel) nmap output, check my other script here: https://github.com/dogasantos/nmapxml-to-xlsx
-I have plans to add this feature as optional, in this tool in the future.
+## RECOMMENDED TOOLS:
+
+### EXCEL OUTPUT
+
+Generate a XLSX (Excel) nmap report:
+```
+https://github.com/dogasantos/nmapxml-to-xlsx
+```
+
+### INTELIGENT WEB TARGETS
+Generate a list of WEB targets (with protocol and port):
+
+```
+https://github.com/dogasantos/webmapper
+```
+
+
+
 
 twitter: @dogasantos
 

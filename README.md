@@ -17,10 +17,10 @@ Again, this tool will create 3 report files per IP/target (text, grepable, xml).
 This tool will generate 4 files:<br>
 <br>
 ```
-<given-report-name>.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
-<given-report-name>.nmap.grepable - a grepable nmap report<br>
-<given-report-name>.nmap.text - a standard text nmap report<br>
-<given-report-name>.nmap.xml - a xml formated nmap report<br>
+<given-report-name>.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.
+<given-report-name>.nmap.grepable - a grepable nmap report
+<given-report-name>.nmap.text - a standard text nmap report
+<given-report-name>.nmap.xml - a xml formated nmap report
 ```
 
 

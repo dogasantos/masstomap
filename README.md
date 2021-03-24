@@ -9,6 +9,9 @@ A nmap grepable, text and xml report will be created.
 
 Masstomap creates a single nmap report per IP/target while it is running against a list of targets. The reason is that you can stop the scan and resume later. Soon as every target is scanned, masstomap will craft a single compliant nmap report using 3 different formats.
 
+### NOTE ###
+Again, this tool will create 3 report files per IP/target (text, grepable, xml). All those files will be merged automatically in the end. Don't freak out.
+
 ### FILES
 
 This tool will generate 4 files:<br>

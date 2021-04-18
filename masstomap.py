@@ -69,7 +69,7 @@ def nmap_xml_fingerprinttable(user_output, verbose):
         openports = nmapObj[ip]['tcp'].keys()
         for port in openports:
             service_details = nmapObj[ip]['tcp'][port]
-            line = ip+":"+str(port)+":"+service_details['name']+":"+service_details['product']+":"+service_details['version']
+            line = ip+":"+str(port)+":"+service_details['name']+":"+service_details['product'].rstrip(":")+":"+service_details['version'].rstrip(":")
             f.write(line+"\n")
     f.close()
     return True

@@ -3,7 +3,7 @@
 # This script parses the masscan standard output (text), creating simple ip:port file report
 # and feed nmap in order to run versioning and scripts
 #
-# version: v0.3
+# 
 # Author: dogasantos
 # url: https://github.com/dogasantos/masstomap
 ###############################################################################################
@@ -15,8 +15,9 @@ import nmap
 import argparse
 import xml.dom.minidom
 
+version = "v0.4"
 def banner():
-    print("masstomap v0.2 - masscan-to-nmap @dogasantos")
+    print("masstomap "+version+" - masscan-to-nmap @dogasantos")
     print("--------------------------------------------")
     print("This script will execute a fast masscan task")
     print("and produce different reports based on provided options:")
@@ -26,7 +27,6 @@ def banner():
     print(" - nmap text report")
     print(" - nmap grepable report")
     print("\nNOTE: it will produce a xml per target while running, then sumarize into 1 (valid) xml file in the end")
-    
 
 def parser_error(errmsg):
     banner()
@@ -45,6 +45,31 @@ def parse_args():
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
     return parser.parse_args()
+
+
+
+
+def nmap_LoadXmlObject(filename):
+    nm = nmap.PortScanner()
+    nxo = open(filename, "r")
+    xmlres = nxo.read()
+    nm.analyse_nmap_xml_scan(xmlres)
+    return nm
+
+def nmap_xml_fingerprinttable(user_output, verbose):
+    nmapObj = nmap_LoadXmlObject(user_output+".nmap.xml")
+
+    f = open(user_output + ".fprint", "w")
+    for ip in nmapObj.all_hosts():
+        #print("[*] Host: " + ip)
+        openports = nmapObj[ip]['tcp'].keys()
+        for port in openports:
+            service_details = nmapObj[ip]['tcp'][port]
+            line = ip+":"+str(port)+":"+service_details['name']+":"+service_details['product']+":"+service_details['version']
+            f.write(line)
+    f.close()
+    return True
+
 
 
 def parseMasscan(masscanreport, verbose):
@@ -225,5 +250,11 @@ if __name__ == "__main__":
     else:
         wrapupxml(user_output, user_verbose)
         #createxlsx(user_output, user_verbose) notyet
+
+    # additional formats:
+    # xlsx
+    #nmap_xml_to_xslx(user_output + ".nmap.xml", verbose)
+    # ip:port:name:finterprint
+    nmap_xml_fingerprinttable(user_output ,verbose)
 
     

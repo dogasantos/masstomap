@@ -254,9 +254,9 @@ if __name__ == "__main__":
 
     # additional formats:
     # xlsx
-    #nmap_xml_to_xslx(user_output + ".nmap.xml", verbose)
+    #nmap_xml_to_xslx(user_output + ".nmap.xml", user_verbose)
     # ip:port:name:finterprint
 
-    nmap_xml_fingerprinttable(user_output ,verbose)
+    nmap_xml_fingerprinttable(user_output ,user_verbose)
 
     

@@ -57,7 +57,7 @@ def nmap_LoadXmlObject(filename):
     return nm
 
 def nmap_xml_fingerprinttable(user_output, verbose):
-    if not os.path.isfile(user_output + ".nmap.xml") or os.path.getsize(output + ".nmap.xml") < 100:
+    if not os.path.isfile(user_output + ".nmap.xml") or os.path.getsize(user_output + ".nmap.xml") < 100:
         print("[x] Nmap xml report not found. Can't generate fingerprint table file")
         return False
 

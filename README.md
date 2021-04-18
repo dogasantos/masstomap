@@ -5,14 +5,23 @@ masstomap is a simple python script that can be used to read masscan reports and
 You need to specify a masscan standard report file (-oL) and a name for the nmap report file this tool should create. 
 A nmap grepable, text and xml report will be created. 
 
+### Pause and Resume scan
+
+Masstomap creates a single nmap report per IP/target while it is running against a list of targets. The reason is that you can stop the scan and resume later. Soon as every target is scanned, masstomap will craft a single compliant nmap report using 3 different formats.
+
+### NOTE ###
+Again, this tool will create 3 report files per IP/target (text, grepable, xml). All those files will be merged automatically in the end. Don't freak out.
+
 ### FILES
 
 This tool will generate 4 files:<br>
 <br>
-`<given-report-name>.new` - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.<br>
-`<given-report-name>.nmap.grepable` - a grepable nmap report<br>
-`<given-report-name>.nmap.text` - a standard text nmap report<br>
-`<given-report-name>.nmap.xml` - a xml formated nmap report<br>
+```
+<given-report-name>.new - a new masscan report using different notation (ip:port1,port2,portN) so you can run your own (custom) nmap scanning whenever you need.
+<given-report-name>.nmap.grepable - a grepable nmap report
+<given-report-name>.nmap.text - a standard text nmap report
+<given-report-name>.nmap.xml - a xml formated nmap report
+```
 
 
 
@@ -47,28 +56,37 @@ This tool will generate 4 files:<br>
 
 
 
-###EXAMPLE:
+### EXAMPLE:
 <br>
 First, masscan:<br>
 <br>
-`$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>`<br>
+
+```
+$ sudo masscan -p1-65535 --rate 1000 --open -oL output.masscan <target>
+```
+
 <br>
 Then masstomap:<br>
 <br>
-`$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp`<br>
-`$ ls`<br>
-`output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml`<br>
-`$`<br>
-<br>
-<br>
+
+```
+
+$ python /usr/share/masstomap/masstomap.py -m output.masscan -o target.tcp
+$ ls
+output.masscan  output.masscan.new  target.tcp.nmap.grepable  target.tcp.nmap.txt  target.tcp.nmap.xml
+$
+
+```
+
 
 ### Requirements:
 
-python-nmap<br>
-argparse<br>
+check requirements.txt file
 
 Resolve requirements by running 
-`pip install -p requirements.txt`
+```
+pip install -p requirements.txt
+```
 
 ### NMAP SCRIPTS:
 
@@ -87,8 +105,24 @@ http-internal-ip-disclosure
 
 Remove --privileged if you don't plan to execute nmap as root.
 
-If you're looking for XLSX (excel) nmap output, check my other script here: https://github.com/dogasantos/nmapxml-to-xlsx
-I have plans to add this feature as optional, in this tool in the future.
+## RECOMMENDED TOOLS:
+
+### EXCEL OUTPUT
+
+Generate a XLSX (Excel) nmap report:
+```
+https://github.com/dogasantos/nmapxml-to-xlsx
+```
+
+### INTELIGENT WEB TARGETS
+Generate a list of WEB targets (with protocol and port):
+
+```
+https://github.com/dogasantos/webmapper
+```
+
+
+
 
 twitter: @dogasantos
 

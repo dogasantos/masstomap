@@ -237,9 +237,9 @@ if __name__ == "__main__":
         print("[x] The specified masscan file can't be found.")
         sys.exit(1)
 
-    if user_output and noscan:
-        print("[x] -n and -o can't work together. Choose just one.")
-        sys.exit(1)
+    #if user_output and noscan:
+    #    print("[x] -n and -o can't work together. Choose just one.")
+    #    sys.exit(1)
 
     if not user_output:
         user_output="scanreport"

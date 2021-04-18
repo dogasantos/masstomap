@@ -57,6 +57,10 @@ def nmap_LoadXmlObject(filename):
     return nm
 
 def nmap_xml_fingerprinttable(user_output, verbose):
+    if not os.path.isfile(user_output + ".nmap.xml") or os.path.getsize(output + ".nmap.xml") < 100:
+        print("[x] Nmap xml report not found. Can't generate fingerprint table file")
+        return False
+
     nmapObj = nmap_LoadXmlObject(user_output+".nmap.xml")
 
     f = open(user_output + ".fprint", "w")
@@ -241,20 +245,18 @@ if __name__ == "__main__":
         user_output="scanreport"
 
     ipdict = parseMasscan(user_masscan, user_verbose)
-    if noscan:
-        sys.exit(0)
-
-    ret=executeNmap(ipdict, user_verbose, user_script_list, user_output)
-    if ret == False:
-        print("[x] Nmap can't reach those targets.")
-    else:
-        wrapupxml(user_output, user_verbose)
-        #createxlsx(user_output, user_verbose) notyet
+    if not noscan:
+        ret=executeNmap(ipdict, user_verbose, user_script_list, user_output)
+        if ret == False:
+            print("[x] Nmap can't reach those targets.")
+        else:
+            wrapupxml(user_output, user_verbose)
 
     # additional formats:
     # xlsx
     #nmap_xml_to_xslx(user_output + ".nmap.xml", verbose)
     # ip:port:name:finterprint
+
     nmap_xml_fingerprinttable(user_output ,verbose)
 
     

@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('-n', '--noscan', help="Just convert to ip:port1,port2 notation. Do not execute nmap scan.", required=False, action='store_true')
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=False)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
-    parser.add_argument('-v', '--verbose', help='Enable Verbosity', nargs='?', default=False)
+    parser.add_argument('-v', '--verbose', help='Enable Verbosity', default=False, action='store_true')
     return parser.parse_args()
 
 
@@ -75,25 +75,32 @@ def nmap_xml_fingerprinttable(user_output, verbose):
     return True
 
 
+def loadips(masscan_report_content):
+    iplist = list()
+    for item in masscan_report_content:
+        if '#' in item:
+            continue
+        if "open tcp" in item:
+            ipaddr = item.split()[3]
+            if ipaddr not in iplist:
+                iplist.append(ipaddr)
+
+        elif "Discovered open port" in item:
+            ipaddr = item.split()[5]
+            if ipaddr not in iplist:
+                iplist.append(ipaddr)
+        
+    iplist = list(set(iplist))  # uniq
+
+
+    return iplist
+
 
 def parseMasscan(masscanreport, verbose):
     print("[*] Parsing masscan report file")
     m = open(masscanreport, "r")
     masscan_report_content = m.readlines()
-    iplist = list()
-    for item in masscan_report_content:
-        if '#' in item:
-            continue
-        if "Discovered open port" in item:
-            ipaddr = item.split()[5]
-            if ipaddr not in iplist:
-                iplist.append(ipaddr)
-            # ['Discovered', 'open', 'port', '45507/tcp', 'on', '192.168.0.1']
-        if "open tcp" in item:
-            ipaddr = item.split()[3]
-            if ipaddr not in iplist:
-                iplist.append(ipaddr)
-    iplist = list(set(iplist))  # uniq
+    iplist = loadips(masscan_report_content)
     ipdict = dict((el, 0) for el in iplist)
 
     if verbose:
@@ -111,7 +118,7 @@ def parseMasscan(masscanreport, verbose):
             if "Discovered open port" in item:
                 if unique_ip == item.split()[5]:                #ip
                     pl.append(item.split()[3].split("/")[0])    #port
-        ipdict[unique_ip] = list(pl)
+        ipdict[unique_ip] = list(set(pl))
 
     if verbose:
         print("  + Creating new report")
@@ -257,11 +264,11 @@ if __name__ == "__main__":
         else:
             wrapupxml(user_output, user_verbose)
 
-    # additional formats:
-    # xlsx
-    #nmap_xml_to_xslx(user_output + ".nmap.xml", user_verbose)
-    # ip:port:name:finterprint
+        # additional formats:
+        # xlsx
+        #nmap_xml_to_xslx(user_output + ".nmap.xml", user_verbose)
+        # ip:port:name:finterprint
 
-    nmap_xml_fingerprinttable(user_output ,user_verbose)
+        nmap_xml_fingerprinttable(user_output ,user_verbose)
 
     

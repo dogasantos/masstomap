@@ -103,7 +103,7 @@ http-internal-ip-disclosure
 
 #### NOTE: 
 
-Remove --privileged if you don't plan to execute nmap as root.
+Remove --privileged if you don't plan to execute nmap as root (won't be able to use synscan, just full tcp scan which is slower)
 
 ## RECOMMENDED TOOLS:
 

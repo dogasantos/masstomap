@@ -51,7 +51,11 @@ This tool will generate 4 files:<br>
     <td>-v [VERBOSE], --verbose [VERBOSE]</td>
     <td> Enable Verbosity</td> 
   </tr>
-  
+  <tr>
+    <td>-t THREADS, --threads THREADS</td>
+    <td> number of nmap threads</td>
+   </tr>
+  <tr>  
 </table>
 
 
@@ -125,4 +129,8 @@ https://github.com/dogasantos/webmapper
 
 
 twitter: @dogasantos
-
+<br>
+<br>
+Contributers:
+<br>
+twitter: @R4g3D_

@@ -140,7 +140,7 @@ def executeNmap(targets, verbose, script_list, output, threads):
     print("[*] Executing nmap scans")
 
     if threads:
-        MAX_THREADS = threads
+        MAX_THREADS = int(threads)
     else:
         MAX_THREADS = 8
 
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     user_verbose = args.verbose
     user_output = args.nmap_output
     noscan = args.noscan
-    threads = int(args.threads)
+    threads = args.threads
 
     if os.path.isfile(user_masscan) == False:
         print("[x] The specified masscan file can't be found.")

@@ -180,7 +180,7 @@ def executeNmap(targets, verbose, script_list, output, threads):
 
     return True
 
-def executeNmapThread(ip, target_ports, NMAP_ARGUMENTS):
+def executeNmapThread(ip, target_ports, verbose, NMAP_ARGUMENTS, output):
     nm = nmap.PortScanner()
     nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
 
@@ -298,5 +298,4 @@ if __name__ == "__main__":
         # ip:port:name:finterprint
 
         nmap_xml_fingerprinttable(user_output ,user_verbose)
-
-    
+        

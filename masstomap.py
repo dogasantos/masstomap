@@ -14,6 +14,7 @@ import sys
 import nmap
 import argparse
 import xml.dom.minidom
+import threading
 
 version = "v0.4"
 def banner():
@@ -44,6 +45,7 @@ def parse_args():
     parser.add_argument('-o', '--nmap-output', help="nmap output file", required=False)
     parser.add_argument('-sl', '--script-list', help="Comma separated list of nmap scripts to run", required=False)
     parser.add_argument('-v', '--verbose', help='Enable Verbosity', default=False, action='store_true')
+    parser.add_argument('-t', '--threads', help='Number of nmap threads', required=False)
     return parser.parse_args()
 
 
@@ -134,8 +136,15 @@ def parseMasscan(masscanreport, verbose):
 
     return ipdict
 
-def executeNmap(targets, verbose, script_list, output):
-    print("[*] Executing nmap scan")
+def executeNmap(targets, verbose, script_list, output, threads):
+    print("[*] Executing nmap scans")
+
+    if threads:
+        MAX_THREADS = threads
+    else:
+        MAX_THREADS = 8
+
+    NMAP_THREADS = []
 
     for ip, ports in targets.items():
         if os.path.isfile(output + ".nmap.xml." + ip) and os.path.getsize(output + ".nmap.xml." + ip) > 5:
@@ -154,21 +163,39 @@ def executeNmap(targets, verbose, script_list, output):
         NMAP_ARGUMENTS = "-sV --version-all -A -oG " + output + ".nmap.grepable." + ip + " -oN  " + output + ".nmap.text." + ip + " --script=" + NMAP_SCRIPTS + " --privileged -Pn --open"
         if verbose:
             print("  + Target:  %s : %s" % (str(ip), target_ports))
-        nm = nmap.PortScanner()
-        nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
+            print("    + Target scan started.")
 
-        if verbose:
-            print("  + Target scanned.")
-        xmlout = nm.get_nmap_last_output()
+        while len(NMAP_THREADS) >= MAX_THREADS:
+            for NMAP_THREAD in NMAP_THREADS:
+                if not NMAP_THREAD.is_alive():
+                    NMAP_THREADS.remove(NMAP_THREAD)
+                    break
 
-        if verbose:
-            print("  + Dumping report files (text,xml,grepable)")
-        xmlreportfile = output + ".nmap.xml." + ip
-        fx = open(xmlreportfile, "w")
-        fx.write(xmlout)
-        fx.close()
+        NMAP_THREAD = threading.Thread(target=executeNmapThread, args=(ip, target_ports, NMAP_ARGUMENTS))
+        NMAP_THREAD.start()
+        NMAP_THREADS.append(NMAP_THREAD)
+
+    for NMAP_THREAD in NMAP_THREADS:
+        NMAP_THREAD.join()
+
     return True
 
+def executeNmapThread(ip, target_ports, NMAP_ARGUMENTS):
+    nm = nmap.PortScanner()
+    nm.scan(hosts=ip, ports=target_ports, arguments=NMAP_ARGUMENTS)
+
+    if verbose:
+        print("  + Target:  %s : %s" % (str(ip), target_ports))
+        print("    + Target scanned.")
+    xmlout = nm.get_nmap_last_output()
+
+    if verbose:
+        print("  + Target:  %s : %s" % (str(ip), target_ports))
+        print("    + Dumping report files (text,xml,grepable)")
+    xmlreportfile = output + ".nmap.xml." + ip
+    fx = open(xmlreportfile, "w")
+    fx.write(xmlout)
+    fx.close()
 
 def wrapupxml(user_output, verbose):
     print("[*] Wrapping up...")
@@ -244,6 +271,7 @@ if __name__ == "__main__":
     user_verbose = args.verbose
     user_output = args.nmap_output
     noscan = args.noscan
+    threads = int(args.threads)
 
     if os.path.isfile(user_masscan) == False:
         print("[x] The specified masscan file can't be found.")
@@ -258,7 +286,7 @@ if __name__ == "__main__":
 
     ipdict = parseMasscan(user_masscan, user_verbose)
     if not noscan:
-        ret=executeNmap(ipdict, user_verbose, user_script_list, user_output)
+        ret=executeNmap(ipdict, user_verbose, user_script_list, user_output, threads)
         if ret == False:
             print("[x] Nmap can't reach those targets.")
         else:

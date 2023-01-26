@@ -16,7 +16,7 @@ import argparse
 import xml.dom.minidom
 import threading
 
-version = "v0.4"
+version = "v0.5"
 def banner():
     print("masstomap "+version+" - masscan-to-nmap @dogasantos")
     print("--------------------------------------------")

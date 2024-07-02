@@ -126,11 +126,3 @@ https://github.com/dogasantos/webmapper
 ```
 
 
-
-
-twitter: @dogasantos
-<br>
-<br>
-Contributers:
-<br>
-twitter: @R4g3D_

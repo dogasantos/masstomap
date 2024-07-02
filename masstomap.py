@@ -11,7 +11,7 @@
 import re
 import os
 import sys
-import nmap3
+import nmap
 import argparse
 import xml.dom.minidom
 import threading

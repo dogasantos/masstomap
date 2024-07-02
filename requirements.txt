@@ -1,2 +1,2 @@
 argparse
--e git://github.com/dogasantos/python-nmap.git#egg=python-nmap
+python3-nmap @ git+https://github.com/nmmapper/python3-nmap

@@ -99,7 +99,7 @@ func generateNewFile(targets map[string][]string, newFile string) error {
 	log.Printf(".new file created: %s\n", newFile)
 	return nil
 }
-func anyWeb(result) []string {
+func anyWeb(result *nmap.Run) []string {
 	var interesting []string
 	var url string
 
@@ -109,18 +109,18 @@ func anyWeb(result) []string {
 		}
 
 		for _, port := range host.Ports {
-			if port.State == "open" {
+			if port.State.State == "open" {
 				for _, proto := range webprotos {
 					if port.Protocol == proto {
 						if port.Protocol == "https" || port.Protocol == "ssl" {
-							if port.ID != "443" {
+							if port.ID != 443 {
 								url = fmt.Sprintf("https://%s:%s", host.Addresses[0], port.ID)
 							} else {
 								url = fmt.Sprintf("https://%s", host.Addresses[0])
 							}
 							interesting = append(interesting, url)
 						} else {
-							if port.ID != "80" {
+							if port.ID != 80 {
 								url = fmt.Sprintf("http://%s:%s", host.Addresses[0], port.ID)
 							} else {
 								url = fmt.Sprintf("http://%s", host.Addresses[0])
@@ -179,18 +179,11 @@ func runNmap(ip, baseName string, ports []string, minRate int, scripts string, w
 	}
 
 	found_urls := anyWeb(result)
+	urls = append(urls, found_urls...)
 
 	err = os.WriteFile(xmlOutputFile, xmlData, 0644)
 	if err != nil {
 		log.Printf("Failed to write XML report for %s: %v", ip, err)
-	}
-
-	// Generate the .web file based on the XML data
-	err = os.WriteFile(webOutputFile, xmlData, 0644)
-	if err != nil {
-		log.Printf("Failed to write web report for %s: %v", ip, err)
-	} else {
-		log.Printf(".web file created for %s: %s\n", ip, webOutputFile)
 	}
 
 	log.Printf("Nmap scan completed for %s with --min-rate=%d\n", ip, minRate)
@@ -356,6 +349,18 @@ func main() {
 	// Combine intermediate files into final reports
 	if err := combineReports(*outputFile, targets); err != nil {
 		log.Fatalf("Error combining reports: %v", err)
+	}
+	weboutfile := fmt.Sprintf("%s.web", *outputFile)
+	webf, err := os.Create(weboutfile)
+	if err != nil {
+		resetTerminal()
+		return
+	}
+	defer webf.Close()
+
+	for _, url := range urls {
+		webf.Write([]byte(url))
+		//outputFile.WriteString("\n")
 	}
 
 	resetTerminal()

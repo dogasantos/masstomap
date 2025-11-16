@@ -223,22 +223,21 @@ def banner():
     """Display script banner with version and description."""
     print(f"\n{'='*70}")
     print(f"  masstomap {VERSION} - masscan-to-nmap @dogasantos")
-    print(f"  Advanced Edition with Smart Features")
     print(f"{'='*70}")
     print("\nFeatures:")
-    print("  ✓ Smart port grouping for efficient scanning")
-    print("  ✓ Resume capability with state tracking")
-    print("  ✓ Progress tracking and ETA calculation")
-    print("  ✓ JSON output format")
-    print("  ✓ Detailed statistics and reporting")
-    print("  ✓ Configurable timeout and retry logic")
+    print("  - Smart port grouping for efficient scanning")
+    print("  - Resume capability with state tracking")
+    print("  - Progress tracking and ETA calculation")
+    print("  - JSON output format")
+    print("  - Detailed statistics and reporting")
+    print("  - Configurable timeout and retry logic")
     print(f"{'='*70}\n")
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Parse masscan output and run detailed nmap scans (Advanced Edition)',
+        description='Parse masscan output and run detailed nmap scans',
         epilog=f'Example: python {sys.argv[0]} -m masscan-report-file.txt',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -325,12 +324,7 @@ def parse_args() -> argparse.Namespace:
     # Display options
     parser.add_argument(
         '-v', '--verbose',
-        help='Enable verbosity',
-        action='store_true'
-    )
-    parser.add_argument(
-        '-q', '--quiet',
-        help='Quiet mode - minimal output',
+        help='Enable verbose output with debug information',
         action='store_true'
     )
     parser.add_argument(
@@ -373,12 +367,12 @@ def load_ips_from_masscan(masscan_content: List[str]) -> Set[str]:
     return iplist
 
 
-def parse_masscan(masscan_report: str, logger: logging.Logger) -> Dict[str, ScanTarget]:
+def parse_masscan_report(masscan_file: str, logger: logging.Logger) -> Dict[str, ScanTarget]:
     """
-    Parse masscan report and create dictionary of scan targets.
+    Parse masscan report file and extract IP:port mappings.
     
     Args:
-        masscan_report: Path to masscan report file
+        masscan_file: Path to masscan report file
         logger: Logger instance
         
     Returns:
@@ -386,11 +380,15 @@ def parse_masscan(masscan_report: str, logger: logging.Logger) -> Dict[str, Scan
     """
     logger.info("Parsing masscan report file")
     
+    if not os.path.isfile(masscan_file):
+        logger.error(f"File not found: {masscan_file}")
+        sys.exit(1)
+    
     try:
-        with open(masscan_report, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(masscan_file, 'r', encoding='utf-8', errors='ignore') as f:
             masscan_content = f.readlines()
     except IOError as e:
-        logger.error(f"Failed to read masscan report: {e}")
+        logger.error(f"Error reading file: {e}")
         sys.exit(1)
     
     # Extract unique IPs
@@ -410,11 +408,13 @@ def parse_masscan(masscan_report: str, logger: logging.Logger) -> Dict[str, Scan
         
         parts = line.split()
         
+        # Format: "open tcp 31280 10.11.28.135 1763314534"
         if len(parts) >= 4 and "open" in parts and "tcp" in parts:
             port = parts[2]
             ipaddr = parts[3]
             if ipaddr in ip_ports:
                 ip_ports[ipaddr].append(port)
+        # Format: "Discovered open port 80/tcp on 192.168.1.1"
         elif len(parts) >= 6 and "Discovered" in parts and "open" in parts and "port" in parts:
             port = parts[3].split('/')[0]
             ipaddr = parts[5]
@@ -427,23 +427,32 @@ def parse_masscan(masscan_report: str, logger: logging.Logger) -> Dict[str, Scan
         unique_ports = sorted(set(ports), key=int)
         targets[ip] = ScanTarget(ip=ip, ports=unique_ports)
     
-    # Write simplified report
-    report_path = f"{masscan_report}.new"
-    
-    try:
-        with open(report_path, 'w', encoding='utf-8') as f:
-            for ip in sorted(targets.keys()):
-                f.write(f"{ip}:{targets[ip].ports_str()}\n")
-        logger.info(f"Simplified report saved to: {report_path}")
-    except IOError as e:
-        logger.error(f"Failed to write simplified report: {e}")
-    
     return targets
+
+
+def save_simplified_report(targets: Dict[str, ScanTarget], output_file: str, logger: logging.Logger):
+    """
+    Save simplified ip:port report.
+    
+    Args:
+        targets: Dictionary of scan targets
+        output_file: Output file path
+        logger: Logger instance
+    """
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            for ip, target in sorted(targets.items()):
+                f.write(f"{ip}:{target.ports_str()}\n")
+        
+        logger.info(f"Simplified report saved to: {output_file}")
+    
+    except IOError as e:
+        logger.error(f"Error writing file: {e}")
 
 
 def group_targets_by_ports(targets: Dict[str, ScanTarget], logger: logging.Logger) -> Dict[str, ScanTarget]:
     """
-    Group targets with identical port lists for more efficient scanning.
+    Group targets by port similarity for more efficient scanning.
     
     Args:
         targets: Dictionary of scan targets
@@ -480,7 +489,7 @@ def execute_nmap_scan(target: ScanTarget, nmap_args: str, output: str,
         target: ScanTarget object
         nmap_args: Nmap arguments template
         output: Output file prefix
-        timeout: Scan timeout in seconds
+        timeout: Scan timeout in seconds (note: not used by python-nmap scan() method)
         logger: Logger instance
         
     Returns:
@@ -497,7 +506,9 @@ def execute_nmap_scan(target: ScanTarget, nmap_args: str, output: str,
         args = nmap_args.replace('{ip}', ip)
         
         logger.debug(f"Scanning {ip} ports {ports}")
-        nm.scan(hosts=ip, ports=ports, arguments=args, timeout=timeout)
+        # FIXED: Removed timeout parameter as it's not supported by python-nmap PortScanner.scan()
+        # The timeout is handled by nmap itself via command-line arguments if needed
+        nm.scan(hosts=ip, ports=ports, arguments=args)
         
         xmlout = nm.get_nmap_last_output()
         
@@ -699,188 +710,59 @@ def merge_xml_files(output: str, logger: logging.Logger) -> bool:
     root.set('version', '7.80')
     root.set('xmloutputversion', '1.04')
     
-    host_count = 0
-    
-    # Parse and merge all XML files
+    # Process each XML file
     for xml_file in xml_files:
         try:
-            logger.debug(f"Processing {xml_file.name}")
-            
             tree = ET.parse(xml_file)
             xml_root = tree.getroot()
             
             # Extract host elements
             for host in xml_root.findall('host'):
                 root.append(host)
-                host_count += 1
-            
-            # Clean up individual file
-            logger.debug(f"Removing {xml_file.name}")
-            xml_file.unlink()
-            
+        
         except ET.ParseError as e:
-            logger.warning(f"Failed to parse {xml_file.name}: {e}")
+            logger.warning(f"Failed to parse {xml_file}: {e}")
             continue
         except Exception as e:
-            logger.error(f"Error processing {xml_file.name}: {e}")
+            logger.warning(f"Error processing {xml_file}: {e}")
             continue
     
-    # Add runstats element
+    # Add runstats
     runstats = ET.SubElement(root, 'runstats')
     finished = ET.SubElement(runstats, 'finished')
     finished.set('time', str(int(time.time())))
     finished.set('timestr', datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
     
     hosts = ET.SubElement(runstats, 'hosts')
-    hosts.set('up', str(host_count))
+    hosts.set('up', str(len(root.findall('host'))))
     hosts.set('down', '0')
-    hosts.set('total', str(host_count))
+    hosts.set('total', str(len(root.findall('host'))))
     
     # Write merged XML
-    tree = ET.ElementTree(root)
-    ET.indent(tree, space='  ')
-    
-    final_xml = f"{output}.nmap.xml"
-    
+    merged_file = f"{output}.nmap.xml"
     try:
-        tree.write(final_xml, encoding='utf-8', xml_declaration=True)
-        logger.info(f"Merged XML saved to: {final_xml} ({host_count} hosts)")
+        tree = ET.ElementTree(root)
+        tree.write(merged_file, encoding='utf-8', xml_declaration=True)
+        logger.info(f"Merged XML saved to: {merged_file}")
         return True
+    
     except Exception as e:
         logger.error(f"Failed to write merged XML: {e}")
         return False
 
 
-def merge_text_files(output: str, logger: logging.Logger) -> bool:
-    """Merge individual text report files."""
-    logger.debug("Merging text report files")
-    
-    text_files = sorted(Path('.').glob(f"{output}.nmap.text.*"))
-    final_report = f"{output}.nmap.txt"
-    
-    if not text_files:
-        return False
-    
-    try:
-        with open(final_report, 'w', encoding='utf-8') as outfile:
-            for text_file in text_files:
-                try:
-                    with open(text_file, 'r', encoding='utf-8', errors='ignore') as infile:
-                        content = infile.read()
-                        outfile.write(content)
-                        outfile.write('\n' + '='*60 + '\n\n')
-                    
-                    logger.debug(f"Removing {text_file.name}")
-                    text_file.unlink()
-                    
-                except Exception as e:
-                    logger.warning(f"Error processing {text_file.name}: {e}")
-        
-        logger.info(f"Text report saved to: {final_report}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to merge text files: {e}")
-        return False
-
-
-def merge_grepable_files(output: str, logger: logging.Logger) -> bool:
-    """Merge individual grepable report files."""
-    logger.debug("Merging grepable report files")
-    
-    grep_files = sorted(Path('.').glob(f"{output}.nmap.grepable.*"))
-    final_report = f"{output}.nmap.grepable"
-    
-    if not grep_files:
-        return False
-    
-    try:
-        with open(final_report, 'w', encoding='utf-8') as outfile:
-            for grep_file in grep_files:
-                try:
-                    with open(grep_file, 'r', encoding='utf-8', errors='ignore') as infile:
-                        for line in infile:
-                            if line.startswith('# Nmap'):
-                                continue
-                            outfile.write(line)
-                    
-                    logger.debug(f"Removing {grep_file.name}")
-                    grep_file.unlink()
-                    
-                except Exception as e:
-                    logger.warning(f"Error processing {grep_file.name}: {e}")
-        
-        logger.info(f"Grepable report saved to: {final_report}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to merge grepable files: {e}")
-        return False
-
-
-def wrapup_reports(output: str, logger: logging.Logger) -> bool:
-    """Merge all individual report files into final reports."""
-    logger.info("Wrapping up reports...")
-    
-    success = True
-    success &= merge_xml_files(output, logger)
-    success &= merge_text_files(output, logger)
-    success &= merge_grepable_files(output, logger)
-    
-    return success
-
-
-def create_fingerprint_table(output: str, logger: logging.Logger) -> bool:
-    """Create fingerprint table from nmap XML output."""
-    xml_file = f"{output}.nmap.xml"
-    
-    if not os.path.isfile(xml_file) or os.path.getsize(xml_file) < 100:
-        logger.warning("Nmap XML report not found or too small")
-        return False
-    
-    logger.info("Creating fingerprint table")
-    
-    try:
-        nm = nmap.PortScanner()
-        with open(xml_file, 'r', encoding='utf-8') as f:
-            xmlres = f.read()
-        nm.analyse_nmap_xml_scan(xmlres)
-    except Exception as e:
-        logger.error(f"Failed to load XML: {e}")
-        return False
-    
-    fprint_file = f"{output}.fprint"
-    
-    try:
-        with open(fprint_file, 'w', encoding='utf-8') as f:
-            for ip in nm.all_hosts():
-                if 'tcp' not in nm[ip]:
-                    continue
-                
-                for port in nm[ip]['tcp'].keys():
-                    service = nm[ip]['tcp'][port]
-                    
-                    name = service.get('name', '')
-                    product = service.get('product', '').rstrip(':')
-                    version = service.get('version', '').rstrip(':')
-                    
-                    line = f"{ip}:{port}:{name}:{product}:{version}"
-                    f.write(line + "\n")
-        
-        logger.info(f"Fingerprint table saved to: {fprint_file}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to create fingerprint table: {e}")
-        return False
-
-
 def generate_json_report(targets: Dict[str, ScanTarget], stats: ScanStatistics, 
-                        output: str, logger: logging.Logger) -> bool:
-    """Generate JSON report with detailed results."""
-    logger.info("Generating JSON report")
+                        output: str, logger: logging.Logger):
+    """
+    Generate JSON report with detailed results.
     
-    json_file = f"{output}.json"
+    Args:
+        targets: Dictionary of scan targets
+        stats: Scan statistics
+        output: Output file prefix
+        logger: Logger instance
+    """
+    logger.info("Generating JSON report")
     
     report = {
         'metadata': {
@@ -893,67 +775,75 @@ def generate_json_report(targets: Dict[str, ScanTarget], stats: ScanStatistics,
     }
     
     for ip, target in targets.items():
-        report['targets'][ip] = {
-            'ip': target.ip,
-            'ports': target.ports,
-            'port_count': target.port_count(),
-            'status': target.status,
-            'attempts': target.attempts,
-            'scan_time': target.scan_time,
-            'last_error': target.last_error
-        }
+        report['targets'][ip] = asdict(target)
     
+    json_file = f"{output}.json"
     try:
         with open(json_file, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2)
         
         logger.info(f"JSON report saved to: {json_file}")
-        return True
-        
+    
     except Exception as e:
-        logger.error(f"Failed to generate JSON report: {e}")
-        return False
+        logger.error(f"Failed to write JSON report: {e}")
 
 
-def print_statistics(stats: ScanStatistics, logger: logging.Logger):
-    """Print scan statistics."""
+def print_statistics(stats: ScanStatistics):
+    """
+    Print scan statistics in a formatted table.
+    
+    Args:
+        stats: Scan statistics
+    """
     print(f"\n{'='*70}")
     print("SCAN STATISTICS")
     print(f"{'='*70}")
-    print(f"Total Targets:     {stats.total_targets}")
-    print(f"Scanned:           {stats.scanned_targets}")
-    print(f"Failed:            {stats.failed_targets}")
-    print(f"Skipped:           {stats.skipped_targets}")
-    print(f"Total Ports:       {stats.total_ports}")
-    print(f"Duration:          {stats.duration():.2f} seconds")
-    print(f"Success Rate:      {stats.success_rate():.1f}%")
-    
-    if stats.scanned_targets > 0:
-        avg_time = stats.duration() / stats.scanned_targets
-        print(f"Avg Time/Target:   {avg_time:.2f} seconds")
-    
+    print(f"{'Total Targets:':<20} {stats.total_targets}")
+    print(f"{'Scanned:':<20} {stats.scanned_targets}")
+    print(f"{'Failed:':<20} {stats.failed_targets}")
+    print(f"{'Skipped:':<20} {stats.skipped_targets}")
+    print(f"{'Total Ports:':<20} {stats.total_ports}")
+    print(f"{'Duration:':<20} {stats.duration():.2f} seconds")
+    print(f"{'Success Rate:':<20} {stats.success_rate():.1f}%")
     print(f"{'='*70}\n")
 
 
 def main():
     """Main execution function."""
+    # Parse arguments
+    args = parse_args()
+    
+    # Setup logging
+    logger = setup_logging(args.verbose, args.log_file)
+    
+    # Display banner
+    banner()
+    
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    args = parse_args()
+    # Parse masscan report
+    targets = parse_masscan_report(args.masscan, logger)
     
-    # Setup logging
-    logger = setup_logging(args.verbose and not args.quiet, args.log_file)
-    
-    # Display banner
-    if not args.quiet:
-        banner()
-    
-    # Validate masscan file
-    if not os.path.isfile(args.masscan):
-        logger.error(f"The specified masscan file can't be found: {args.masscan}")
+    if not targets:
+        logger.error("No targets found in masscan report")
         sys.exit(1)
+    
+    logger.info(f"Found {len(targets)} targets with open ports")
+    
+    # Save simplified report
+    simplified_file = f"{args.masscan}.new"
+    save_simplified_report(targets, simplified_file, logger)
+    
+    # If noscan flag is set, exit here
+    if args.noscan:
+        logger.info("Noscan flag set. Exiting without running nmap scans.")
+        sys.exit(0)
+    
+    # Group ports if requested
+    if args.group_ports:
+        targets = group_targets_by_ports(targets, logger)
     
     # Initialize state manager
     state_file = f"{args.nmap_output}.state.json"
@@ -965,67 +855,40 @@ def main():
         else:
             logger.warning("No previous state found, starting fresh")
     
-    # Parse masscan report
-    targets = parse_masscan(args.masscan, logger)
+    # Execute nmap scans
+    stats = execute_nmap(
+        targets=targets,
+        script_list=args.script_list,
+        output=args.nmap_output,
+        max_threads=args.threads,
+        rate_limit=args.rate_limit,
+        max_retries=args.max_retries,
+        timeout=args.timeout,
+        state_manager=state_manager,
+        show_progress=not args.no_progress,
+        logger=logger
+    )
     
-    if not targets:
-        logger.error("No targets found in masscan report")
+    # Print statistics
+    print_statistics(stats)
+    
+    # Merge XML files
+    if stats.scanned_targets > 0:
+        merge_xml_files(args.nmap_output, logger)
+    else:
+        logger.warning("No scans completed successfully")
+        logger.info("You can retry failed scans with --resume flag")
+    
+    # Generate JSON report if requested
+    if args.json:
+        generate_json_report(targets, stats, args.nmap_output, logger)
+    
+    # Exit with appropriate code
+    if stats.failed_targets > 0:
         sys.exit(1)
-    
-    logger.info(f"Found {len(targets)} targets with open ports")
-    
-    # Group targets if requested
-    if args.group_ports:
-        targets = group_targets_by_ports(targets, logger)
-    
-    # Execute nmap scans if not disabled
-    if not args.noscan:
-        stats = execute_nmap(
-            targets,
-            args.script_list,
-            args.nmap_output,
-            args.threads,
-            args.rate_limit,
-            args.max_retries,
-            args.timeout,
-            state_manager,
-            not args.no_progress and not args.quiet,
-            logger
-        )
-        
-        # Print statistics
-        if not args.quiet:
-            print_statistics(stats, logger)
-        
-        # Check if any scans completed
-        if stats.scanned_targets == 0:
-            logger.warning("No scans completed successfully")
-            if not args.quiet:
-                logger.info("You can retry failed scans with --resume flag")
-            sys.exit(1)
-        
-        # Merge reports
-        wrapup_reports(args.nmap_output, logger)
-        
-        # Create fingerprint table
-        create_fingerprint_table(args.nmap_output, logger)
-        
-        # Generate JSON report if requested
-        if args.json:
-            generate_json_report(targets, stats, args.nmap_output, logger)
-    
-    logger.info("Done!")
+    else:
+        sys.exit(0)
 
 
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\n[!] Interrupted by user")
-        sys.exit(1)
-    except Exception as e:
-        print(f"[!] Fatal error: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
-
+if __name__ == '__main__':
+    main()

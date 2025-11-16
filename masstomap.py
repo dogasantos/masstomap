@@ -6,7 +6,6 @@ and feeds nmap in order to run versioning and scripts
 
 Author: dogasantos
 URL: https://github.com/dogasantos/masstomap
-Enhanced by: AI Assistant with advanced features
 
 Features:
 - Smart port grouping for efficient scanning
